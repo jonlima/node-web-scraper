@@ -9,7 +9,7 @@ var fs = require('fs');
 var app = express();
 
 app.get('/scrape', function(req, res){
-	var url = 'http://www.imdb.com/title/tt4425200';
+	var url = 'http://www.imdb.com/title/tt1229340';
 
 	request(url, function(error, response, html) {
 		if(!error) {
@@ -20,17 +20,25 @@ app.get('/scrape', function(req, res){
 			
 			var json = {
 				title: "",
-				release: "",
-				rating: ""
+				release: ""
 			};
 
-			$('.originalTitle').filter(function() {
+			$('.title_wrapper').filter(function() {
 				var data = $(this);
 				title = data.children().first().text();
-				
-				json.title = title;
+				release = data.children().first().find('span#titleYear').text();
+				title = title.replace(release, "");
+
+				json.title = title.trim();
+				json.release = release;
 			});
 		}
+
+		fs.writeFile('output.json', JSON.stringify(json, null, 4), function(err) {
+			console.log('File successfully written !');
+		});
+
+		res.send('Check your console !');
 	});
 });
 
